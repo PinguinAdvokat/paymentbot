@@ -18,9 +18,32 @@ def start():
     cursor.execute('''
 CREATE TABLE IF NOT EXISTS Users (
 id INTEGER PRIMARY KEY,
-username TEXT NOT NULL
+chat_id INTEGER NOT NULL,
+username TEXT NOT NULL,
+balance INTEGER
 )
 ''')
+
+
+def create_user(chat_id:int, username:str, balance:int=0):
+    connection = sqlite3.connect('data.db')
+    cursor = connection.cursor()
+    cursor.execute(f'SELECT chat_id FROM Users WHERE chat_id = {chat_id}')
+    is_user = cursor.fetchone()
+    if is_user == None:
+        cursor.execute('INSERT INTO Users (chat_id, username, balance) VALUES (?, ?, ?)', (chat_id, username, balance))
+    connection.commit()
+    connection.close()
+
+
+def get_user_info(info:str, chat_id:int=0, username:str=''):
+    if chat_id != 0:
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        cursor.execute(f'SELECT {info} FROM Users WHERE chat_id = {chat_id}')
+        ans = cursor.fetchone()[0]
+        connection.commit()
+        connection.close()
     
     
 def get_data_json(key:str):

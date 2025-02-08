@@ -35,7 +35,7 @@ async def callback_pay(callback:CallbackQuery):
         currency='RUB',
         prices=[
             LabeledPrice(
-                label='balance',
+                label='пополнение баланса',
                 amount=int(callback.data[4:]) * 100
             )
         ],
@@ -51,7 +51,7 @@ async def process_pre_checkout_query(pre_ch_query: PreCheckoutQuery):
 
 @dp.message(F.successful_payment)
 async def process_successful_payment(message:Message):
-    await message.answer(f'sucessful payment')
+    await message.answer(f'баланс пользователя {message.from_user.username} успешно пополнен')
 
 
 async def bot_start():

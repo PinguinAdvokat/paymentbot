@@ -5,7 +5,7 @@ from aiogram.types import (Message, CallbackQuery, InlineKeyboardMarkup,
                            InlineKeyboardButton, LabeledPrice, SuccessfulPayment, 
                            RefundedPayment, PreCheckoutQuery)
 from aiogram.filters import Command
-from handlers import ro
+from user import ro
 
 
 bot = Bot(tools.get_data_json('bot_token'))
@@ -46,12 +46,16 @@ async def callback_pay(callback:CallbackQuery):
 
 @dp.pre_checkout_query()
 async def process_pre_checkout_query(pre_ch_query: PreCheckoutQuery):
-    await bot.answer_pre_checkout_query(pre_checkout_query_id=pre_ch_query.id,  ok=True)
+    if tools.is_user_in_database(username=pre_ch_query.from_user.username):
+        await bot.answer_pre_checkout_query(pre_ch_query.id, ok=True)
+    else:
+        await bot.answer_pre_checkout_query(pre_ch_query.id, ok=False, error_message='Some error message...')
 
 
 @dp.message(F.successful_payment)
 async def process_successful_payment(message:Message):
-    await message.answer(f'баланс пользователя {message.from_user.username} успешно пополнен')
+    tools.add_balance(message.chat.id, message.invoice.total_amount / 100)
+    await message.answer(f"Ваш баланс успешно пополнен на {message.invoice.total_amount / 100} рублей.\nВаш текущий баланс: *{tools.get_user_info(message.chat.id, 'balance')} рублей*")
 
 
 async def bot_start():
